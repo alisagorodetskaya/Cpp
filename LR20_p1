@@ -1,0 +1,55 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Person {
+public:
+    string name;
+    int age;
+    double height;
+    double weight;
+    double side;
+    double previous_side;
+
+    void set(string n, int a, double h, double w, double s) {
+        name = n;
+        age = a;
+        height = h;
+        weight = w;
+        previous_side = side;
+        side = s;
+    }
+
+    double get_area() {
+        return side * side;
+    }
+
+    bool changet() {
+        return previous_side != side;
+    }
+};
+
+void print(Person* person) {
+    cout << person->name << " is " << person->age << " years old" << endl;
+}
+
+int main() {
+    Person person1;
+    person1.set("Harry", 23, 1.75, 70, 4.0);
+    cout << "Meet " << person1.name << endl;
+    print(&person1);
+    cout << "Area: " << person1.get_area() << endl;
+    cout << "Changed: " << (person1.changet() ? "Yes" : "No") << endl;
+
+    Person person2;
+    person2.set("Anna", 30, 1.65, 60, 5.0);
+    print(&person2);
+    cout << "Area: " << person2.get_area() << endl;
+
+    Person person3;
+    person3.set("John", 40, 1.80, 80, 4.0);
+    print(&person3);
+    cout << "Area: " << person3.get_area() << endl;
+
+    return 0;
+}
