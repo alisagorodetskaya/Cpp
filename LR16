@@ -1,0 +1,50 @@
+#include <iostream>
+#include <ctime>
+using namespace std;
+
+struct Date {
+    int year;
+    int month;
+    int day;
+};
+
+bool isLeap(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+int monthLength(int year, int month) {
+    int monthDays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if (month == 2 && isLeap(year)) return 29;
+    return monthDays[month - 1];
+}
+
+Date today(void) {
+    time_t t = time(NULL);
+    tm tl = *localtime(&t);
+    Date currentDate;
+    currentDate.year = tl.tm_year + 1900;
+    currentDate.month = tl.tm_mon + 1;
+    currentDate.day = tl.tm_mday;
+    return currentDate;
+}
+
+int daysSince(Date from, Date to) {
+    int days = 0;
+    for (int y = from.year; y < to.year; ++y)
+        days += isLeap(y) ? 366 : 365;
+    for (int m = 1; m < from.month; ++m)
+        days -= monthLength(from.year, m);
+    days -= from.day;
+    for (int m = 1; m < to.month; ++m)
+        days += monthLength(to.year, m);
+    days += to.day;
+    return days;
+}
+
+int main(void) {
+    Date birthdate = {2000, 1, 1};
+    Date now = today();
+    int totalDays = daysSince(birthdate, now);
+    cout << "Днів від народження до сьогодні: " << totalDays << endl;
+    return 0;
+}
