@@ -1,0 +1,73 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+using namespace std;
+
+class IPAddress {
+public:
+    IPAddress(const string& ip) : address(ip) {}
+    IPAddress(const IPAddress& other) : address(other.address) {}
+
+    virtual void print() const {
+        cout << address;
+    }
+
+    virtual ~IPAddress() {}
+
+protected:
+    string address;
+};
+
+class IPAddressChecked : public IPAddress {
+public:
+    IPAddressChecked(const string& ip) : IPAddress(ip) {
+        isCorrect = checkAddress(ip);
+    }
+
+    IPAddressChecked(const IPAddressChecked& other) : IPAddress(other), isCorrect(other.isCorrect) {}
+
+    void print() const override {
+        IPAddress::print();
+        cout << " - " << (isCorrect ? "Correct" : "Not Correct");
+    }
+
+private:
+    bool isCorrect;
+
+    bool checkAddress(const string& ip) {
+        istringstream ss(ip);
+        string token;
+        int count = 0;
+
+        while (getline(ss, token, '.')) {
+            if (++count > 4) return false;
+            if (token.empty()) return false;
+            for (char ch : token) {
+                if (!isdigit(ch)) return false;
+            }
+            int num = stoi(token);
+            if (num < 0 || num > 255) return false;
+        }
+        return count == 4;
+    }
+};
+
+int main() {
+    string ip1, ip2, ip3;
+    getline(cin, ip1);
+    getline(cin, ip2);
+    getline(cin, ip3);
+
+    IPAddress base(ip1);
+    IPAddressChecked checked1(ip2);
+    IPAddressChecked checked2(ip3);
+
+    base.print();
+    cout << endl;
+    checked1.print();
+    cout << endl;
+    checked2.print();
+    cout << endl;
+
+    return 0;
+}
