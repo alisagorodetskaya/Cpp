@@ -1,0 +1,114 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <cmath>
+using namespace std;
+
+class Fraction {
+public:
+    Fraction(int numerator, int denominator);
+    string toString();
+    double toDouble();
+    Fraction plus(Fraction that);
+    Fraction minus(Fraction that);
+    Fraction times(Fraction that);
+    Fraction by(Fraction that);
+
+private:
+    int numerator;
+    int denominator;
+    void reduce();
+    static int gcd(int a, int b);
+};
+
+Fraction::Fraction(int numerator, int denominator) {
+    if (denominator < 0) {
+        numerator = -numerator;
+        denominator = -denominator;
+    }
+    this->numerator = numerator;
+    this->denominator = denominator;
+    reduce();
+}
+
+int Fraction::gcd(int a, int b) {
+    while (b != 0) {
+        int r = a % b;
+        a = b;
+        b = r;
+    }
+    return abs(a);
+}
+
+void Fraction::reduce() {
+    int g = gcd(numerator, denominator);
+    numerator /= g;
+    denominator /= g;
+}
+
+string Fraction::toString() {
+    int whole = numerator / denominator;
+    int remainder = abs(numerator % denominator);
+    if (remainder == 0)
+        return to_string(whole);
+    else if (whole != 0)
+        return to_string(whole) + " " + to_string(remainder) + "/" + to_string(denominator);
+    else
+        return to_string(numerator) + "/" + to_string(denominator);
+}
+
+double Fraction::toDouble() {
+    return static_cast<double>(numerator) / denominator;
+}
+
+Fraction Fraction::plus(Fraction that) {
+    int num = this->numerator * that.denominator + that.numerator * this->denominator;
+    int den = this->denominator * that.denominator;
+    return Fraction(num, den);
+}
+
+Fraction Fraction::minus(Fraction that) {
+    int num = this->numerator * that.denominator - that.numerator * this->denominator;
+    int den = this->denominator * that.denominator;
+    return Fraction(num, den);
+}
+
+Fraction Fraction::times(Fraction that) {
+    int num = this->numerator * that.numerator;
+    int den = this->denominator * that.denominator;
+    return Fraction(num, den);
+}
+
+Fraction Fraction::by(Fraction that) {
+    int num = this->numerator * that.denominator;
+    int den = this->denominator * that.numerator;
+    if (den < 0) {
+        num = -num;
+        den = -den;
+    }
+    return Fraction(num, den);
+}
+
+int main() {
+    string input1, input2;
+    getline(cin, input1);
+    getline(cin, input2);
+    int num1, den1, num2, den2;
+    char slash;
+
+    istringstream iss1(input1);
+    iss1 >> num1 >> slash >> den1;
+
+    istringstream iss2(input2);
+    iss2 >> num2 >> slash >> den2;
+
+    Fraction a(num1, den1);
+    Fraction b(num2, den2);
+
+    cout << a.toString() << " + " << b.toString() << " = " << a.plus(b).toString() << endl;
+    cout << a.toString() << " - " << b.toString() << " = " << a.minus(b).toString() << endl;
+    cout << a.toString() << " * " << b.toString() << " = " << a.times(b).toString() << endl;
+    cout << a.toString() << " / " << b.toString() << " = " << a.by(b).toString() << endl;
+
+    return 0;
+}
