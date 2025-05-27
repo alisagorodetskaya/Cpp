@@ -1,0 +1,165 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+using namespace std;
+
+class FlightBooking {
+public:
+    FlightBooking();
+    FlightBooking(int id, int capacity, int reserved);
+    void printStatus();
+    bool reserveSeats(int number_of_seats);
+    bool cancelReservations(int number_of_seats);
+    int getId() { return id; }
+
+private:
+    int id;
+    int capacity;
+    int reserved;
+    int getMaxReservation();
+};
+
+FlightBooking::FlightBooking() {
+    id = 0;
+    capacity = 0;
+    reserved = 0;
+}
+
+FlightBooking::FlightBooking(int id, int capacity, int reserved) {
+    this->id = id;
+    this->capacity = capacity;
+    int maxReserve = getMaxReservation();
+    if (reserved < 0)
+        this->reserved = 0;
+    else if (reserved > maxReserve)
+        this->reserved = maxReserve;
+    else
+        this->reserved = reserved;
+}
+
+int FlightBooking::getMaxReservation() {
+    return static_cast<int>(capacity * 1.05 + 0.5);
+}
+
+void FlightBooking::printStatus() {
+    double percentage = (static_cast<double>(reserved) / capacity) * 100;
+    cout << "Flight " << id << " : " << reserved << "/" << capacity
+         << " (" << static_cast<int>(percentage + 0.5) << "%) seats reserved" << endl;
+}
+
+bool FlightBooking::reserveSeats(int number_of_seats) {
+    if (number_of_seats < 0) return false;
+    if (reserved + number_of_seats <= getMaxReservation()) {
+        reserved += number_of_seats;
+        return true;
+    }
+    return false;
+}
+
+bool FlightBooking::cancelReservations(int number_of_seats) {
+    if (number_of_seats < 0) return false;
+    if (reserved - number_of_seats >= 0) {
+        reserved -= number_of_seats;
+        return true;
+    }
+    return false;
+}
+
+int main() {
+    FlightBooking flights[10];
+    string command;
+
+    while (true) {
+        bool anyFlight = false;
+        for (int i = 0; i < 10; ++i)
+            if (flights[i].getId() != 0)
+                anyFlight = true;
+
+        if (!anyFlight)
+            cout << "No flights in the system" << endl;
+        else {
+            for (int i = 0; i < 10; ++i)
+                if (flights[i].getId() != 0)
+                    flights[i].printStatus();
+        }
+
+        cout << "What would you like to do?: ";
+        getline(cin, command);
+        if (command == "quit")
+            break;
+
+        stringstream ss(command);
+        string action;
+        int id, value;
+        ss >> action >> id >> value;
+
+        if (action == "create") {
+            bool exists = false;
+            for (int i = 0; i < 10; ++i) {
+                if (flights[i].getId() == id) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) {
+                cout << "Cannot perform this operation: flight " << id << " already exists" << endl;
+                continue;
+            }
+            bool created = false;
+            for (int i = 0; i < 10; ++i) {
+                if (flights[i].getId() == 0) {
+                    flights[i] = FlightBooking(id, value, 0);
+                    created = true;
+                    break;
+                }
+            }
+            if (!created)
+                cout << "Cannot perform this operation: flight limit reached" << endl;
+
+        } else if (action == "delete") {
+            bool deleted = false;
+            for (int i = 0; i < 10; ++i) {
+                if (flights[i].getId() == id) {
+                    flights[i] = FlightBooking();
+                    deleted = true;
+                    break;
+                }
+            }
+            if (!deleted)
+                cout << "Cannot perform this operation: flight " << id << " not found" << endl;
+
+        } else if (action == "add") {
+            bool success = false;
+            for (int i = 0; i < 10; ++i) {
+                if (flights[i].getId() == id) {
+                    if (!flights[i].reserveSeats(value)) {
+                        cout << "Cannot perform this operation: capacity reached" << endl;
+                    }
+                    success = true;
+                    break;
+                }
+            }
+            if (!success)
+                cout << "Cannot perform this operation: flight " << id << " not found" << endl;
+
+        } else if (action == "cancel") {
+            bool success = false;
+            for (int i = 0; i < 10; ++i) {
+                if (flights[i].getId() == id) {
+                    if (!flights[i].cancelReservations(value)) {
+                        cout << "Cannot perform this operation: not enough reservations" << endl;
+                    }
+                    success = true;
+                    break;
+                }
+            }
+            if (!success)
+                cout << "Cannot perform this operation: flight " << id << " not found" << endl;
+
+        } else {
+            cout << "Unknown command" << endl;
+        }
+    }
+
+    return 0;
+}
